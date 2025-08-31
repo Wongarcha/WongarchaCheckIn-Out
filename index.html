@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Check-In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 30px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .page-title, .greeting {
+            color: #4a4a4a;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #777;
+        }
+        .input-group input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #00c6d7;
+        }
+        .button {
+            width: 100%;
+            background-color: #00c6d7;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background-color: #0099a6;
+            transform: translateY(-2px);
+        }
+        .switch-page-btn {
+            background: none;
+            border: none;
+            color: #00a8ff;
+            text-decoration: none;
+            margin-top: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+        .switch-page-btn:hover {
+            color: #007bb5;
+        }
+        .register-page, .login-page, .checkin-page, .history-page, .profile-page {
+            display: none;
+        }
+        .date-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e6f7ff;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .date-text {
+            color: #4a4a4a;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .update-btn {
+            background-color: #00a8ff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .update-btn:hover {
+            background-color: #007bb5;
+        }
+        .location-section {
+            background-color: #f7f7f7;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .location-text {
+            color: #777;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .coordinates {
+            color: #333;
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+        .time-display {
+            text-align: center;
+            color: #00c6d7;
+            font-size: 50px;
+            font-weight: 700;
+            margin: 30px 0;
+            letter-spacing: 2px;
+        }
+        .check-in-btn {
+            width: 100%;
+            background-color: #00c6d7;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .check-in-btn:hover {
+            background-color: #0099a6;
+            transform: translateY(-2px);
+        }
+        .check-in-btn:disabled {
+            background-color: #b0e0e6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .history-section {
+            margin-top: 20px;
+        }
+        .history-list {
+            list-style: none;
+            padding: 0;
+        }
+        .history-item {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 10px;
+            border-left: 5px solid #00c6d7;
+        }
+        .history-item p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .status-message {
+            text-align: center;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .checked-in {
+            color: #4caf50;
+        }
+        .checked-out {
+            color: #f44336;
+        }
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .profile-image-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid #ddd;
+        }
+        .profile-image-container img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .profile-image-container i {
+            font-size: 60px;
+            color: #ccc;
+        }
+        .profile-image-upload {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background-color: #00c6d7;
+            color: white;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .profile-image-upload i {
+            font-size: 16px;
+            color: white;
+        }
+        .profile-name, .profile-username {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .profile-username {
+            font-size: 16px;
+            font-weight: 400;
+            color: #777;
+            margin-top: 5px;
+        }
+        .navigation-bar {
+            display: none;
+            justify-content: space-around;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 440px;
+            height: 70px;
+            background-color: #fff;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #777;
+            transition: color 0.3s ease;
+        }
+        .nav-item:hover, .nav-item.active {
+            color: #00c6d7;
+        }
+        .nav-item i {
+            font-size: 22px;
+        }
+        .nav-item span {
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        .history-item.check-in-item {
+            border-left: 5px solid #4caf50;
+        }
+        .history-item.check-out-item {
+            border-left: 5px solid #f44336;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="login-page" class="login-page">
+            <div class="header">
+                <img src="CompanyLogo.jpg" alt="Company Logo" class="logo">
+                <h1 class="page-title">เข้าสู่ระบบ</h1>
+            </div>
+            <div class="form-section">
+                <div class="input-group">
+                    <label for="login-username">ชื่อผู้ใช้</label>
+                    <input type="text" id="login-username" placeholder="ป้อนชื่อผู้ใช้">
+                </div>
+                <div class="input-group">
+                    <label for="login-password">รหัสผ่าน</label>
+                    <input type="password" id="login-password" placeholder="ป้อนรหัสผ่าน">
+                </div>
+                <button class="button" onclick="handleLogin()">เข้าสู่ระบบ</button>
+            </div>
+            <button class="switch-page-btn" onclick="switchPage('register-page')">ยังไม่มีบัญชี? ไปหน้าลงทะเบียน</button>
+        </div>
+
+        <div id="register-page" class="register-page">
+            <div class="header">
+                <img src="CompanyLogo.jpg" alt="Company Logo" class="logo">
+                <h1 class="page-title">ลงทะเบียนผู้ใช้งาน</h1>
+            </div>
+            <div class="form-section">
+                <div class="input-group">
+                    <label for="reg-name">ชื่อ-นามสกุล</label>
+                    <input type="text" id="reg-name" placeholder="ป้อนชื่อ-นามสกุล">
+                </div>
+                <div class="input-group">
+                    <label for="reg-username">ชื่อผู้ใช้</label>
+                    <input type="text" id="reg-username" placeholder="ป้อนชื่อผู้ใช้">
+                </div>
+                <div class="input-group">
+                    <label for="reg-password">รหัสผ่าน</label>
+                    <input type="password" id="reg-password" placeholder="ป้อนรหัสผ่าน">
+                </div>
+                <button class="button" onclick="handleRegister()">ลงทะเบียน</button>
+            </div>
+            <button class="switch-page-btn" onclick="switchPage('login-page')">มีบัญชีอยู่แล้ว? ไปหน้าเข้าสู่ระบบ</button>
+        </div>
+
+        <div id="checkin-page" class="checkin-page">
+            <div class="header">
+                <h1 class="greeting" id="user-greeting">สวัสดี!</h1>
+            </div>
+            <div class="date-section">
+                <span class="date-text" id="current-date">วันที่ กำลังโหลด...</span>
+                <button class="update-btn" onclick="getLocation()">อัพเดทตำแหน่งที่อยู่</button>
+            </div>
+            <div class="location-section">
+                <p class="location-text">ที่อยู่ของคุณจะแสดงที่นี่</p>
+                <p class="coordinates">ตำแหน่งปัจจุบัน: <span id="coordinates-display">กำลังหาตำแหน่ง...</span></p>
+            </div>
+            <p class="status-message" id="status-message"></p>
+            <div class="time-display" id="time-display">00:00:00</div>
+            <button class="check-in-btn" id="checkin-btn" onclick="handleCheckIn()">เช็คอิน</button>
+            <button class="check-in-btn" id="checkout-btn" style="background-color: #f44336; margin-top: 10px; display: none;" onclick="handleCheckOut()">เช็คเอาท์</button>
+        </div>
+
+        <div id="history-page" class="history-page">
+            <div class="header">
+                <h1 class="page-title">ประวัติการเช็คอิน</h1>
+            </div>
+            <div class="history-section">
+                <ul class="history-list" id="history-list"></ul>
+            </div>
+        </div>
+
+        <div id="profile-page" class="profile-page">
+            <div class="header">
+                <h1 class="page-title">โปรไฟล์ผู้ใช้</h1>
+            </div>
+            <div class="profile-section">
+                <div class="profile-image-container" onclick="document.getElementById('profile-image-input').click()">
+                    <img id="profile-image-display" src="" alt="Profile Image" style="display: none;">
+                    <i id="profile-icon" class="fa-solid fa-user-circle"></i>
+                    <div class="profile-image-upload">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                </div>
+                <input type="file" id="profile-image-input" style="display: none;" accept="image/*" onchange="handleProfileImageChange(event)">
+                <p class="profile-name" id="profile-name-display"></p>
+                <p class="profile-username" id="profile-username-display"></p>
+                <button class="button" onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation-bar" id="navigation-bar">
+        <div class="nav-item active" onclick="switchPage('checkin-page')">
+            <i class="fa-solid fa-house"></i>
+            <span>เช็คอิน</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('history-page')">
+            <i class="fa-solid fa-history"></i>
+            <span>ประวัติ</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('profile-page')">
+            <i class="fa-solid fa-user"></i>
+            <span>โปรไฟล์</span>
+        </div>
+        <div class="nav-item" onclick="logout()">
+            <i class="fa-solid fa-sign-out-alt"></i>
+            <span>ออกจากระบบ</span>
+        </div>
+    </div>
+
+    <script>
+        let userDatabase = [];
+        let currentUser = null;
+        const appScriptUrl = 'https://script.google.com/macros/s/AKfycbxz7h8OlHTpxVg6DcV2Z82L96LmYApY8N7r9xnb6TFty7a5Vtk9jca8xKhqwjjcWaS4fw/exec';
+
+        window.switchPage = (pageId) => {
+            const pages = ['login-page', 'register-page', 'checkin-page', 'history-page', 'profile-page'];
+            pages.forEach(id => document.getElementById(id).style.display = 'none');
+            
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const navMap = {
+                'checkin-page': 0,
+                'history-page': 1,
+                'profile-page': 2,
+                'logout-btn': 3
+            };
+            if (navMap[pageId] !== undefined) {
+                document.querySelectorAll('.nav-item')[navMap[pageId]].classList.add('active');
+            }
+            
+            document.getElementById(pageId).style.display = 'block';
+
+            if (pageId === 'checkin-page') {
+                initializeCheckInPage();
+            } else if (pageId === 'history-page') {
+                renderHistory();
+            } else if (pageId === 'profile-page') {
+                renderProfile();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedUsers = localStorage.getItem('userDatabase');
+            if (storedUsers) {
+                userDatabase = JSON.parse(storedUsers);
+            }
+            switchPage('login-page');
+            document.getElementById('navigation-bar').style.display = 'none';
+        });
+
+        function saveUsersToLocalStorage() {
+            localStorage.setItem('userDatabase', JSON.stringify(userDatabase));
+        }
+
+        window.handleRegister = () => {
+            const name = document.getElementById('reg-name').value;
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+
+            if (name && username && password) {
+                const userExists = userDatabase.find(user => user.username === username);
+                if (userExists) {
+                    alert('ชื่อผู้ใช้ซ้ำ กรุณาเลือกชื่อผู้ใช้ใหม่');
+                    return;
+                }
+                userDatabase.push({ name, username, password, lastAction: null, history: [], profileImage: null });
+                saveUsersToLocalStorage();
+                alert('ลงทะเบียนสำเร็จ! ตอนนี้คุณสามารถเข้าสู่ระบบได้');
+                switchPage('login-page');
+            } else {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+            }
+        };
+
+        window.handleLogin = () => {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const user = userDatabase.find(u => u.username === username && u.password === password);
+            if (user) {
+                currentUser = user; 
+                document.getElementById('user-greeting').textContent = `สวัสดี! ${currentUser.name}`;
+                alert(`ยินดีต้อนรับ ${currentUser.name}!`);
+                updateUIBasedOnStatus();
+                document.getElementById('navigation-bar').style.display = 'flex';
+                switchPage('checkin-page'); 
+            } else {
+                alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+            }
+        };
+
+        window.logout = () => {
+            currentUser = null;
+            alert('คุณออกจากระบบแล้ว');
+            document.getElementById('navigation-bar').style.display = 'none';
+            switchPage('login-page');
+        };
+
+        const timeDisplay = document.getElementById('time-display');
+        const currentDateDisplay = document.getElementById('current-date');
+        const coordinatesDisplay = document.getElementById('coordinates-display');
+        const checkinBtn = document.getElementById('checkin-btn');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const historyList = document.getElementById('history-list');
+        const statusMessage = document.getElementById('status-message');
+        const profileImageDisplay = document.getElementById('profile-image-display');
+        const profileIcon = document.getElementById('profile-icon');
+
+        function updateTime() {
+            const now = new Date();
+            const options = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+            currentDateDisplay.textContent = `วันที่ ${now.toLocaleDateString('th-TH', options)}`;
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        window.getLocation = () => {
+            if (navigator.geolocation) {
+                coordinatesDisplay.textContent = 'กำลังดึงตำแหน่ง...';
+                checkinBtn.disabled = true;
+                checkoutBtn.disabled = true;
+                const options = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        coordinatesDisplay.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                        checkinBtn.disabled = false;
+                        checkoutBtn.disabled = false;
+                    },
+                    (error) => {
+                        coordinatesDisplay.textContent = 'ไม่สามารถดึงตำแหน่งได้';
+                        console.error("Error getting location: ", error);
+                        checkinBtn.disabled = true;
+                        checkoutBtn.disabled = true;
+                    },
+                    options
+                );
+            } else {
+                coordinatesDisplay.textContent = 'เบราว์เซอร์ไม่รองรับ Geolocation';
+                checkinBtn.disabled = true;
+                checkoutBtn.disabled = true;
+            }
+        };
+
+        async function sendDataToSheet(action, coords) {
+            if (!currentUser || !appScriptUrl) {
+                console.error("User not logged in or App Script URL not configured.");
+                return;
+            }
+            const data = {
+                name: currentUser.name,
+                action: action,
+                coords: coords
+            };
+            try {
+                const response = await fetch(appScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                console.log(`Data for ${action} sent to Google Sheet.`);
+            } catch (error) {
+                console.error(`Failed to send data to Google Sheet for ${action}:`, error);
+            }
+        }
+
+        function updateUIBasedOnStatus() {
+            if (currentUser && currentUser.lastAction === 'เช็คอิน') {
+                checkinBtn.style.display = 'none';
+                checkoutBtn.style.display = 'block';
+                statusMessage.textContent = 'สถานะ: เช็คอินเรียบร้อยแล้ว';
+                statusMessage.className = 'status-message checked-in';
+            } else {
+                checkinBtn.style.display = 'block';
+                checkoutBtn.style.display = 'none';
+                statusMessage.textContent = 'สถานะ: ยังไม่ได้เช็คอิน';
+                statusMessage.className = 'status-message checked-out';
+            }
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = '';
+            if (currentUser && currentUser.history) {
+                currentUser.history.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = `history-item ${item.action === 'เช็คอิน' ? 'check-in-item' : 'check-out-item'}`;
+                    li.innerHTML = `
+                        <p><strong>สถานะ:</strong> ${item.action}</p>
+                        <p><strong>วันที่:</strong> ${item.date}</p>
+                        <p><strong>เวลา:</strong> ${item.time}</p>
+                        <p><strong>พิกัด:</strong> ${item.coords}</p>
+                    `;
+                    historyList.appendChild(li);
+                });
+            }
+        }
+
+        function renderProfile() {
+            if (currentUser) {
+                document.getElementById('profile-name-display').textContent = `ชื่อ-นามสกุล: ${currentUser.name}`;
+                document.getElementById('profile-username-display').textContent = `ชื่อผู้ใช้: ${currentUser.username}`;
+                if (currentUser.profileImage) {
+                    profileImageDisplay.src = currentUser.profileImage;
+                    profileImageDisplay.style.display = 'block';
+                    profileIcon.style.display = 'none';
+                } else {
+                    profileImageDisplay.style.display = 'none';
+                    profileIcon.style.display = 'block';
+                }
+            }
+        }
+
+        window.handleProfileImageChange = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentUser.profileImage = e.target.result;
+                    saveUsersToLocalStorage();
+                    renderProfile();
+                    alert('อัปเดตรูปภาพโปรไฟล์แล้ว!');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.initializeCheckInPage = () => {
+            setInterval(updateTime, 1000);
+            updateTime();
+            getLocation(); 
+            updateUIBasedOnStatus();
+        };
+
+        window.handleCheckIn = () => {
+            if (!currentUser) {
+                alert('กรุณาเข้าสู่ระบบก่อน');
+                return;
+            }
+            const now = new Date();
+            const coords = coordinatesDisplay.textContent;
+            const date = now.toLocaleDateString('th-TH');
+            const time = now.toLocaleTimeString('th-TH');
+            const newEntry = { action: 'เช็คอิน', date, time, coords };
+            currentUser.history.push(newEntry);
+            currentUser.lastAction = 'เช็คอิน';
+            saveUsersToLocalStorage();
+            alert('เช็คอินสำเร็จ!');
+            sendDataToSheet('เช็คอิน', coords);
+            updateUIBasedOnStatus();
+        };
+
+        window.handleCheckOut = () => {
+            if (!currentUser) {
+                alert('กรุณาเข้าสู่ระบบก่อน');
+                return;
+            }
+            const now = new Date();
+            const coords = coordinatesDisplay.textContent;
+            const date = now.toLocaleDateString('th-TH');
+            const time = now.toLocaleTimeString('th-TH');
+            const newEntry = { action: 'เช็คเอาท์', date, time, coords };
+            currentUser.history.push(newEntry);
+            currentUser.lastAction = 'เช็คเอาท์';
+            saveUsersToLocalStorage();
+            alert('เช็คเอาท์สำเร็จ!');
+            sendDataToSheet('เช็คเอาท์', coords);
+            updateUIBasedOnStatus();
+        };
+    </script>
+</body>
+</html>
