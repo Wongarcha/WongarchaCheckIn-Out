@@ -424,6 +424,30 @@
         let currentUser = null;
         const appScriptUrl = 'https://script.google.com/macros/s/AKfycbxz7h8OlHTpxVg6DcV2Z82L96LmYApY8N7r9xnb6TFty7a5Vtk9jca8xKhqwjjcWaS4fw/exec';
 
+        // กำหนดพิกัดสถานที่ที่ต้องการ (เช่น พิกัดออฟฟิศ)
+        const targetLocation = {
+            latitude: 13.354818,  // ตัวอย่าง ละติจูดของสถานที่
+            longitude: 100.986369, // ตัวอย่าง ลองจิจูดของสถานที่
+        };
+
+        // กำหนดรัศมีที่อนุญาตให้เช็คอิน (หน่วยเป็นเมตร)
+        const checkInRadius = 30; // เช่น 100 เมตร
+
+        // ฟังก์ชันคำนวณระยะห่างระหว่างพิกัด 2 จุด (Haversine formula)
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // รัศมีโลกในหน่วยเมตร
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const d = R * c;
+            return d; // ระยะทางในหน่วยเมตร
+        }
+
         window.switchPage = (pageId) => {
             const pages = ['login-page', 'register-page', 'checkin-page', 'history-page', 'profile-page'];
             pages.forEach(id => document.getElementById(id).style.display = 'none');
@@ -488,12 +512,12 @@
             const password = document.getElementById('login-password').value;
             const user = userDatabase.find(u => u.username === username && u.password === password);
             if (user) {
-                currentUser = user; 
+                currentUser = user;  
                 document.getElementById('user-greeting').textContent = `สวัสดี! ${currentUser.name}`;
                 alert(`ยินดีต้อนรับ ${currentUser.name}!`);
                 updateUIBasedOnStatus();
                 document.getElementById('navigation-bar').style.display = 'flex';
-                switchPage('checkin-page'); 
+                switchPage('checkin-page');  
             } else {
                 alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
             }
@@ -568,7 +592,7 @@
             try {
                 const response = await fetch(appScriptUrl, {
                     method: 'POST',
-                    mode: 'no-cors', 
+                    mode: 'no-cors',  
                     cache: 'no-cache',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -642,7 +666,7 @@
         window.initializeCheckInPage = () => {
             setInterval(updateTime, 1000);
             updateTime();
-            getLocation(); 
+            getLocation();  
             updateUIBasedOnStatus();
         };
 
@@ -651,16 +675,28 @@
                 alert('กรุณาเข้าสู่ระบบก่อน');
                 return;
             }
+            const coordsString = coordinatesDisplay.textContent;
+            if (coordsString.includes('ไม่สามารถ')) {
+                alert('ไม่สามารถเช็คอินได้ กรุณาอัพเดทตำแหน่งอีกครั้ง');
+                return;
+            }
+            const [userLat, userLon] = coordsString.split(',').map(coord => parseFloat(coord.trim()));
+            const distance = getDistance(userLat, userLon, targetLocation.latitude, targetLocation.longitude);
+
+            if (distance > checkInRadius) {
+                alert(`คุณอยู่ห่างจากจุดเช็คอิน ${distance.toFixed(2)} เมตร ซึ่งอยู่นอกระยะที่กำหนด (${checkInRadius} เมตร)`);
+                return;
+            }
+
             const now = new Date();
-            const coords = coordinatesDisplay.textContent;
             const date = now.toLocaleDateString('th-TH');
             const time = now.toLocaleTimeString('th-TH');
-            const newEntry = { action: 'เช็คอิน', date, time, coords };
+            const newEntry = { action: 'เช็คอิน', date, time, coords: coordsString };
             currentUser.history.push(newEntry);
             currentUser.lastAction = 'เช็คอิน';
             saveUsersToLocalStorage();
             alert('เช็คอินสำเร็จ!');
-            sendDataToSheet('เช็คอิน', coords);
+            sendDataToSheet('เช็คอิน', coordsString);
             updateUIBasedOnStatus();
         };
 
@@ -669,16 +705,28 @@
                 alert('กรุณาเข้าสู่ระบบก่อน');
                 return;
             }
+            const coordsString = coordinatesDisplay.textContent;
+            if (coordsString.includes('ไม่สามารถ')) {
+                alert('ไม่สามารถเช็คเอาท์ได้ กรุณาอัพเดทตำแหน่งอีกครั้ง');
+                return;
+            }
+            const [userLat, userLon] = coordsString.split(',').map(coord => parseFloat(coord.trim()));
+            const distance = getDistance(userLat, userLon, targetLocation.latitude, targetLocation.longitude);
+
+            if (distance > checkInRadius) {
+                alert(`คุณอยู่ห่างจากจุดเช็คเอาท์ ${distance.toFixed(2)} เมตร ซึ่งอยู่นอกระยะที่กำหนด (${checkInRadius} เมตร)`);
+                return;
+            }
+
             const now = new Date();
-            const coords = coordinatesDisplay.textContent;
             const date = now.toLocaleDateString('th-TH');
             const time = now.toLocaleTimeString('th-TH');
-            const newEntry = { action: 'เช็คเอาท์', date, time, coords };
+            const newEntry = { action: 'เช็คเอาท์', date, time, coords: coordsString };
             currentUser.history.push(newEntry);
             currentUser.lastAction = 'เช็คเอาท์';
             saveUsersToLocalStorage();
             alert('เช็คเอาท์สำเร็จ!');
-            sendDataToSheet('เช็คเอาท์', coords);
+            sendDataToSheet('เช็คเอาท์', coordsString);
             updateUIBasedOnStatus();
         };
     </script>
